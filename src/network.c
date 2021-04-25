@@ -919,7 +919,16 @@ static int make_sock(union mysockaddr *addr, int type, int dienow)
     }
   else if (!set_ipv6pktinfo(fd))
     goto err;
-  
+
+#ifdef __ANDROID__
+  uint32_t mark = daemon->listen_mark;
+  if (mark != 0 && setsockopt(fd, SOL_SOCKET, SO_MARK, &mark, sizeof(mark)) == -1)
+    {
+      my_syslog(LOG_WARNING, _("setsockopt(SO_MARK, 0x%x: %s"), mark, strerror(errno));
+      goto err;
+    }
+#endif /* __ANDROID__ */
+
   return fd;
 }
 

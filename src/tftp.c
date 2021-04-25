@@ -16,6 +16,8 @@
 
 #include "dnsmasq.h"
 
+#define ETHER_ADDR_LEN 6
+
 #ifdef HAVE_TFTP
 
 static void handle_tftp(time_t now, struct tftp_transfer *transfer, ssize_t len);

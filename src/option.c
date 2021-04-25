@@ -170,6 +170,7 @@ struct myoption {
 #define LOPT_PXE_VENDOR    361
 #define LOPT_DYNHOST       362
 #define LOPT_LOG_DEBUG     363
+#define LOPT_LISTNMARK     364
  
 #ifdef HAVE_GETOPT_LONG
 static const struct option opts[] =  
@@ -345,6 +346,9 @@ static const struct myoption opts[] =
     { "dhcp-ignore-clid", 0, 0,  LOPT_IGNORE_CLID },
     { "dynamic-host", 1, 0, LOPT_DYNHOST },
     { "log-debug", 0, 0, LOPT_LOG_DEBUG },
+#ifdef __ANDROID__
+    { "listen-mark", 1, 0, LOPT_LISTNMARK },
+#endif /* __ANDROID__ */
     { NULL, 0, 0, 0 }
   };
 
@@ -527,6 +531,7 @@ static struct {
   { LOPT_DUMPFILE, ARG_ONE, "<path>", gettext_noop("Path to debug packet dump file"), NULL },
   { LOPT_DUMPMASK, ARG_ONE, "<hex>", gettext_noop("Mask which packets to dump"), NULL },
   { LOPT_SCRIPT_TIME, OPT_LEASE_RENEW, NULL, gettext_noop("Call dhcp-script when lease expiry changes."), NULL },
+  { LOPT_LISTNMARK, ARG_ONE, NULL, gettext_noop("Socket mark to use for listen sockets."), NULL },
   { 0, 0, NULL, NULL, NULL }
 }; 
 
@@ -4587,7 +4592,20 @@ err:
 	break;
       }
 #endif
-		
+
+    case LOPT_LISTNMARK: /* --listen-mark */
+      {
+	char *endptr;
+	uint32_t mark = strtoul(arg, &endptr, 0);
+my_syslog(LOG_WARNING, "passed-in mark: %s", arg);
+	if (!*endptr)
+	  daemon->listen_mark = mark;
+	else
+	  ret_err(_("invalid mark"));
+my_syslog(LOG_WARNING, "daemon->listen_mark: 0x%x, *endptr=%d", daemon->listen_mark, *endptr);
+	break;
+      }
+
     default:
       ret_err(_("unsupported option (check that dnsmasq was compiled with DHCP/TFTP/DNSSEC/DBus support)"));
       

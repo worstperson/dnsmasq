@@ -1102,6 +1102,7 @@ extern struct daemon {
   struct ds_config *ds;
   char *timestamp_file;
 #endif
+  uint32_t listen_mark;
 
   /* globally used stuff for DNS */
   char *packet; /* packet buffer */
