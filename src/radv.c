@@ -108,7 +108,12 @@ void ra_init(time_t now)
       setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, &val, sizeof(val)) ||
       setsockopt(fd, IPPROTO_ICMPV6, ICMP6_FILTER, &filter, sizeof(filter)) == -1)
     die (_("cannot create ICMPv6 socket: %s"), NULL, EC_BADNET);
-  
+
+#ifdef __ANDROID__
+  if (setsockopt(fd, SOL_SOCKET, SO_MARK, &daemon->listen_mark, sizeof(daemon->listen_mark)) == -1)
+    die(_("failed to set RADV socket mark: %s"), NULL, EC_BADNET);
+#endif /* __ANDROID__ */
+
    daemon->icmp6fd = fd;
    
    if (daemon->doing_ra)
